@@ -35,10 +35,9 @@ std::vector<QString> readName(QString path)
 node readSettings()
 {
     node settings;
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    //QString path = QCoreApplication::applicationDirPath();
+    //QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString path = QCoreApplication::applicationDirPath();
     path += "/RandomSelector_settings.json";
-    path.remove("/RandomSelector");
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Failed to open file:" << file.errorString();
@@ -66,9 +65,8 @@ void saveSettings(node setting)
             {"MaxG", setting.MaxG},
             {"nameFile",setting.FilePath}
         };
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    path.remove("/RandomSelector");
-    //QString path = QCoreApplication::applicationDirPath();
+    //QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString path = QCoreApplication::applicationDirPath();
     if (path.isEmpty())
     {
         qDebug() << "Failed to get AppData path.";
