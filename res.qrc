@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/background.png</file>
+        <file>fonts/MiSans-Bold.ttf</file>
+        <file>fonts/MiSans-Light.ttf</file>
+        <file>fonts/MiSans-Medium.ttf</file>
+        <file>fonts/MiSans-Normal.ttf</file>
+        <file>sounds/bigstar.wav</file>
+        <file>fonts/custom.ttf</file>
+        <file>images/cuit.png</file>
+        <file>images/mczs.png</file>
+        <file>images/pzhsz.png</file>
+        <file>images/icon.png</file>
+    </qresource>
+</RCC>
