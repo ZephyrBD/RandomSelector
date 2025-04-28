@@ -3,7 +3,7 @@
 ## 简介
 RandomSelector 是一款简单实用的工具，它既可以随机抽取教室中的坐标位置，也能从给定的名单中随机选取名字，还支持随机抽取小组。这个工具适用于各种需要随机选择的场景，比如课堂点名、活动抽奖、小组分组等。
 
-## [v1.0-v3.0](https://gitee.com/mczs/coordinate-point-selector)
+## [v1.0-v3.0](https://gitee.com/mczs/coordinate-point-selector)  Powered by Kitten 3.0 (Codemao)
 
 ## 功能特点
 1. **坐标抽取**：支持随机抽取教室中的坐标，可根据实际教室布局灵活设置坐标范围。
