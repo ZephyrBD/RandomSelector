@@ -34,7 +34,7 @@ RandomSelector 是一款简单实用的工具，它既可以随机抽取教室�
 ## 技术实现
 该工具使用CPP和Qt 6.8.0开发。
 
-##特别感谢
+## 特别感谢
 JetBrains - Clion
 QtCreator
 
