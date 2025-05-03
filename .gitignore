@@ -1,4 +1,8 @@
 .idea
 build
-Mojave.psd
+cmake-build-debug
+cmake-build-release
 RandomSelector.pro.user
+Setup.iss
+mit.txt
+RandomSelector_build_release_V4.0.Beta.1.exe
