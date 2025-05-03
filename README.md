@@ -5,8 +5,9 @@ RandomSelector 是一款简单实用的工具，它既可以随机抽取教室�
 
 ## [v1.0-v3.0](https://gitee.com/mczs/coordinate-point-selector)  Powered by Kitten 3.0 (Codemao)
 
-##
+## 注意
 本程序使用CMake和QMake，理论上QtCreator和Clion等IDE均可打开
+
 ## 功能特点
 1. **坐标抽取**：支持随机抽取教室中的坐标，可根据实际教室布局灵活设置坐标范围。
 2. **名字抽取**：能够从导入的名单中随机挑选名字，名单是文本文件。
