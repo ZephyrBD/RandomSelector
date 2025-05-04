@@ -4,103 +4,56 @@
 #include "settings.h"
 #include "Filehelp.h"
 
-RandomSelector::RandomSelector(QWidget *parent): QWidget(parent), ui(new Ui::RandomSelector)
+RandomSelector::RandomSelector(QWidget *parent):
+    ElaWindow(parent), ui(new Ui::RandomSelector)
 {
     ui->setupUi(this);
     //设置窗口大小
-    this->setMaximumSize(windowWidth,windowHigh);
+    //this->setMaximumSize(windowWidth,windowHigh);
     this->setMinimumSize(windowWidth,windowHigh);
-    setWindowTitle("随机器-ZBD V4.0.Beta.1");
+    setWindowTitle("随机器-ZBD V4.0.Beta.2");
     QIcon icon(":/images/icon.png");
     setWindowIcon(icon);
-    //设置背景
-    bglabel = new QLabel("", this);
-    bglabel->setMinimumSize(windowWidth,windowHigh);
-    bglabel->setMaximumSize(windowWidth,windowHigh);
-    setBackGround(bglabel);
+
 
     // 开始按钮
-    startButton = new QPushButton("开始", this);
-    setButtonStyle(startButton,windowWidth/2-100, windowHigh-120, 200, 50);
-
+    startButton = new ElaPushButton("开始", this);
+    startButton->show();
     //设置按钮
-    settingButton = new QPushButton("设置",this);
-    setButtonStyle(settingButton,windowWidth/2-50, windowHigh-50, 100, 30);
+    settingButton = new ElaPushButton("设置",this);
+    settingButton->show();
+
+    menuBar = new ElaMenuBar(this);
+    menuBar->show();
+
+    zblabelA = new QLabel("8",this);
+    zblabelB = new QLabel("8",this);
+    midLabel = new QLabel(",",this);
+
+
+    // 设置标签字体
+    zblabelA->setFont(getLabelFont());
+    zblabelB->setFont(getLabelFont());
+    midLabel->setFont(getLabelFont());
+
+    // 设置标签颜色和样式
+    zblabelA->setStyleSheet("color: black;");
+    zblabelB->setStyleSheet("color: black;");
+    midLabel->setStyleSheet("color: black;");
+
+    // 显示标签
+    zblabelA->show();
+    zblabelB->show();
+    midLabel->show();
+
+    RSSettings = readSettings();
     //初始化
-    initLabel();
     connect(startButton, &QPushButton::clicked, [this]() {
         onStartButtonClicked(1);
     });
     connect(settingButton,&QPushButton::clicked,this,&RandomSelector::onSettingButtonClicked);
-}
-
-void RandomSelector::initLabel()
-{
-    zblabelA = new QLabel("8",this);
-    zblabelA->setGeometry((windowWidth-50)/2-90, 150, labelWidth, labelHigh);
-    setZBLabelStyle(zblabelA);
-
-    zblabelB = new QLabel("8",this);
-    zblabelB->setGeometry((windowWidth-50)/2+60, 150, labelWidth, labelHigh);
-    setZBLabelStyle(zblabelB);
-
-    midLabel = new QLabel(",",this);
-    midLabel->setGeometry((windowWidth-50)/2+10, 150, labelWidth+20, labelHigh);
-    setZBLabelStyle(midLabel);
-
-    RSSettings = readSettings();
-    modChange();
-}
-
-void RandomSelector::modChange()
-{
-    switch (RSSettings.MODE)
-    {
-    case 1:
-        setupLabels(",", "8", true, true);
-        break;
-    case 2:
-        setupLabels("组", "8", true, false);
-        break;
-    case 3:
-        handleMode3();
-        break;
-    default:
-        break;
-    }
-}
-
-void RandomSelector::setupLabels(const QString& midText, const QString& aText, bool showMid, bool showB)
-{
-    midLabel->setText(midText);
-    setZbLabelA(aText);
-    midLabel->setVisible(showMid);
-    zblabelB->setVisible(showB);
-}
-
-void RandomSelector::setZbLabelA(const QString& text)
-{
-    zblabelA->setText(text);
-    QFontMetrics fm(zblabelA->font());
-    zblabelA->setGeometry((windowWidth-50)/2-90, 150, labelWidth, labelHigh);
-}
-
-void RandomSelector::handleMode3()
-{
-    vt = readName(RSSettings.FilePath);
-    if (vt.empty())
-    {
-        RSSettings.MODE = 1;
-        modChange();
-        QMessageBox::information(this, "RandomSelector", "名单文件无法读取");
-        return;
-    }
-    zblabelA->setText(vt.front());
-    QFontMetrics fm(zblabelA->font());
-    int width = 6 * fm.horizontalAdvance(vt.front());
-    zblabelA->setGeometry((windowWidth - width) / 2, 150, width, labelHigh);
-    zblabelB->hide();
-    midLabel->hide();
+    // 初始化UI
+    updateUI();
 }
 
 void RandomSelector::onStartButtonClicked(int i)
@@ -129,18 +82,49 @@ void RandomSelector::onStartButtonClicked(int i)
     }
 }
 
-void RandomSelector::onSettingButtonClicked()
-{
+void RandomSelector::onSettingButtonClicked() {
     Settings settingsWindow(this,RSSettings);
-    if (settingsWindow.exec() == QDialog::Accepted)
-    {
+    if (settingsWindow.exec() == QDialog::Accepted) {
         RSSettings = settingsWindow.getSettings(RSSettings);
-        modChange();
+        //modChange();
         saveSettings(RSSettings);
     }
 }
 
-RandomSelector::~RandomSelector()
+void RandomSelector::resizeEvent(QResizeEvent *event)
 {
+    QWidget::resizeEvent(event);  // 调用基类处理
+    updateUI();  // 窗口大小改变时更新UI
+}
+
+void RandomSelector::updateUI() {
+    int windowWidth = getWindowWidth();
+    int windowHeight = getWindowHeight();
+    const int START_BUTTON_WIDTH = windowWidth/4;
+    const int SETTING_BUTTON_WIDTH = windowWidth/6;
+    const int BUTTON_HEIGHT = 50;
+    startButton->setGeometry((windowWidth - START_BUTTON_WIDTH) / 2, windowHeight-BUTTON_HEIGHT*2, START_BUTTON_WIDTH, 50);
+    settingButton->setGeometry((windowWidth - SETTING_BUTTON_WIDTH) / 2, windowHeight-BUTTON_HEIGHT, SETTING_BUTTON_WIDTH, 50);
+    menuBar->setGeometry(0, 0, windowWidth, 20);
+
+    // 更新标签位置（如果需要）
+    if(zblabelA && zblabelB && midLabel) {
+        QFontMetrics fm(zblabelA->font());
+        int labelWidth = fm.horizontalAdvance(zblabelA->text());
+        zblabelA->setGeometry((windowWidth - labelWidth*3)/2, 150, labelWidth*3, 50);
+        midLabel->setGeometry(windowWidth/2 - 10, 150, 20, 50);
+        zblabelB->setGeometry(windowWidth/2 + 10, 150, labelWidth*3, 50);
+    }
+}
+
+int RandomSelector::getWindowHeight() {
+    return this->height();
+}
+
+int RandomSelector::getWindowWidth() {
+    return this->width();
+}
+
+RandomSelector::~RandomSelector() {
     delete ui;
 }

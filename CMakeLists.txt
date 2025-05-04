@@ -17,6 +17,7 @@ find_package(Qt6 COMPONENTS
         REQUIRED)
 
 add_executable(${PROJECT_NAME}
+        include/ElaWidgetTools.qrc
         main.cpp
         randomselector.cpp
         res.qrc
@@ -37,8 +38,12 @@ target_link_libraries(RandomSelector
         Qt::Widgets
         Qt::Multimedia
         Qt::Network
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/ElaWidgetTools.lib
 )
 
+include_directories(
+        include
+)
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(DEBUG_SUFFIX)
     if (MSVC AND CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -54,20 +59,20 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if (EXISTS "${QT_INSTALL_PATH}/plugins/platforms/qwindows${DEBUG_SUFFIX}.dll")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E make_directory
-                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/platforms/")
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/platforms/")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 "${QT_INSTALL_PATH}/plugins/platforms/qwindows${DEBUG_SUFFIX}.dll"
-                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/platforms/")
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/platforms/")
     endif ()
     if (EXISTS "${QT_INSTALL_PATH}/plugins/styles/qmodernwindowsstyle${DEBUG_SUFFIX}.dll")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E make_directory
-                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/styles/")
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/styles/")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 "${QT_INSTALL_PATH}/plugins/styles/qmodernwindowsstyle${DEBUG_SUFFIX}.dll"
-                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/styles/")
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/styles/")
     endif ()
 
     # 添加 Multimedia 和 Network 库
@@ -95,15 +100,16 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
         file(GLOB MULTIMEDIA_PLUGINS "${MULTIMEDIA_PLUGINS_DIR}/*.dll")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E make_directory
-                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/multimedia/")
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/multimedia/")
         foreach (PLUGIN ${MULTIMEDIA_PLUGINS})
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy
                     "${PLUGIN}"
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/multimedia/")
+                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/multimedia/")
         endforeach ()
     endif ()
 
+    file(COPY "lib/ElaWidgetTools.dll" DESTINATION "${CMAKE_BINARY_DIR}")
     set_target_properties(${PROJECT_NAME} PROPERTIES
             WIN32_EXECUTABLE TRUE
             MACOSX_BUNDLE TRUE
