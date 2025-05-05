@@ -41,4 +41,10 @@ QFont getLabelFont()
     return font;
 }
 
+void setLabelStyle(QLabel* &label,QString fsize) {
+    label->setStyleSheet("color: #000000;"
+        "font-size: "+fsize+"px;");
+    label->setFont(getLabelFont());
+    label->show();
+}
 #endif // UIHELP_H

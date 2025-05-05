@@ -11,49 +11,77 @@ RandomSelector::RandomSelector(QWidget *parent):
     //设置窗口大小
     //this->setMaximumSize(windowWidth,windowHigh);
     this->setMinimumSize(windowWidth,windowHigh);
-    setWindowTitle("随机器-ZBD V4.0.Beta.2");
+    setWindowTitle("随机器-ZBD V4.1.Beta.1");
     QIcon icon(":/images/icon.png");
     setWindowIcon(icon);
 
 
     // 开始按钮
     startButton = new ElaPushButton("开始", this);
-    startButton->show();
+
     //设置按钮
     settingButton = new ElaPushButton("设置",this);
-    settingButton->show();
+    if (startButton && settingButton) {
+        startButton->show();
+        settingButton->show();
+    }
 
-    menuBar = new ElaMenuBar(this);
-    menuBar->show();
-
+    rsPivot = new ElaPivot(this);
+    if (rsPivot) {
+        rsPivot->appendPivot("坐标模式");
+        rsPivot->appendPivot("小组模式");
+        rsPivot->appendPivot("名单模式");
+    }
+    //标签
     zblabelA = new QLabel("8",this);
     zblabelB = new QLabel("8",this);
     midLabel = new QLabel(",",this);
 
-
-    // 设置标签字体
-    zblabelA->setFont(getLabelFont());
-    zblabelB->setFont(getLabelFont());
-    midLabel->setFont(getLabelFont());
-
-    // 设置标签颜色和样式
-    zblabelA->setStyleSheet("color: black;");
-    zblabelB->setStyleSheet("color: black;");
-    midLabel->setStyleSheet("color: black;");
-
-    // 显示标签
-    zblabelA->show();
-    zblabelB->show();
-    midLabel->show();
-
     RSSettings = readSettings();
+
+    _closeDialog = new ElaContentDialog(this);
+    _closeDialog->setLeftButtonText("取消");
+    _closeDialog->setRightButtonText("退出");
+    _closeDialog->setMiddleButtonText("最小化");
+    connect(_closeDialog, &ElaContentDialog::rightButtonClicked, this, &RandomSelector::closeWindow);
+    connect(_closeDialog, &ElaContentDialog::middleButtonClicked, this, [=]() {
+        _closeDialog->close();
+        showMinimized();
+    });
+    this->setIsDefaultClosed(false);
+    connect(this, &RandomSelector::closeButtonClicked, this, [=]() {
+        _closeDialog->exec();
+    });
+
+
     //初始化
     connect(startButton, &QPushButton::clicked, [this]() {
         onStartButtonClicked(1);
     });
+
+    connect(rsPivot, &ElaPivot::pivotClicked, this, [this](int index) {
+        qDebug() << "Signal received with index:" << index;
+        modChange(index);
+    });
     connect(settingButton,&QPushButton::clicked,this,&RandomSelector::onSettingButtonClicked);
     // 初始化UI
     updateUI();
+}
+
+void RandomSelector::modChange(int index) {
+    qDebug() << "Pivot clicked, index:" << index;
+    switch (index) {
+    case 0:
+        RSSettings.MODE = 1;
+        break;
+    case 1:
+        RSSettings.MODE = 2;
+        break;
+    case 2:
+        RSSettings.MODE = 3;
+        break;
+    }
+    qDebug() << "Current mode:" << RSSettings.MODE;
 }
 
 void RandomSelector::onStartButtonClicked(int i)
@@ -72,7 +100,7 @@ void RandomSelector::onStartButtonClicked(int i)
             QString tmp = vt[getRandomNumber(0,vt.size()-1)];
             zblabelA->setText(tmp);
             QFontMetrics fm(zblabelA->font());
-            zblabelA->setGeometry((windowWidth-6*fm.horizontalAdvance(tmp))/2, 150, 6*fm.horizontalAdvance(tmp), labelHigh);
+            zblabelA->setGeometry((getWindowWidth()-6*fm.horizontalAdvance(tmp))/2, 150, 6*fm.horizontalAdvance(tmp), labelHigh);
         }
         zblabelB->setText(QString::number(getRandomNumber(1,RSSettings.MaxY)));
 
@@ -93,27 +121,48 @@ void RandomSelector::onSettingButtonClicked() {
 
 void RandomSelector::resizeEvent(QResizeEvent *event)
 {
-    QWidget::resizeEvent(event);  // 调用基类处理
-    updateUI();  // 窗口大小改变时更新UI
+    QWidget::resizeEvent(event);
+    updateUI();
 }
 
 void RandomSelector::updateUI() {
     int windowWidth = getWindowWidth();
     int windowHeight = getWindowHeight();
-    const int START_BUTTON_WIDTH = windowWidth/4;
-    const int SETTING_BUTTON_WIDTH = windowWidth/6;
-    const int BUTTON_HEIGHT = 50;
-    startButton->setGeometry((windowWidth - START_BUTTON_WIDTH) / 2, windowHeight-BUTTON_HEIGHT*2, START_BUTTON_WIDTH, 50);
-    settingButton->setGeometry((windowWidth - SETTING_BUTTON_WIDTH) / 2, windowHeight-BUTTON_HEIGHT, SETTING_BUTTON_WIDTH, 50);
-    menuBar->setGeometry(0, 0, windowWidth, 20);
+    if(startButton && settingButton) {
+        const int START_BUTTON_WIDTH = windowWidth/4;
+        const int SETTING_BUTTON_WIDTH = windowWidth/6;
+        const int BUTTON_HEIGHT = windowHeight/10;
+        startButton->setGeometry((windowWidth - START_BUTTON_WIDTH) / 2, windowHeight-BUTTON_HEIGHT*2, START_BUTTON_WIDTH, BUTTON_HEIGHT);
+        settingButton->setGeometry((windowWidth - SETTING_BUTTON_WIDTH) / 2, windowHeight-BUTTON_HEIGHT, SETTING_BUTTON_WIDTH, BUTTON_HEIGHT);
+    }
 
-    // 更新标签位置（如果需要）
+    if (rsPivot) {
+        const int Pivot_WIDTH = 95*3;
+        rsPivot->setCurrentIndex(0);
+        rsPivot->setGeometry((windowWidth - Pivot_WIDTH) / 2, 50, Pivot_WIDTH, 50);
+        rsPivot->show();
+    }
+
     if(zblabelA && zblabelB && midLabel) {
         QFontMetrics fm(zblabelA->font());
-        int labelWidth = fm.horizontalAdvance(zblabelA->text());
-        zblabelA->setGeometry((windowWidth - labelWidth*3)/2, 150, labelWidth*3, 50);
-        midLabel->setGeometry(windowWidth/2 - 10, 150, 20, 50);
-        zblabelB->setGeometry(windowWidth/2 + 10, 150, labelWidth*3, 50);
+        int labelWidthA = fm.horizontalAdvance(zblabelA->text());
+        int labelWidthB = fm.horizontalAdvance(zblabelB->text());
+        int midWidth = fm.horizontalAdvance(midLabel->text());
+
+
+        setLabelStyle(zblabelA,"150");
+        setLabelStyle(zblabelB,"150");
+        setLabelStyle(midLabel,"150");
+        // 计算总宽度
+        int totalWidth = labelWidthA + midWidth + labelWidthB;
+
+        // 计算起始X坐标
+        int startX = (windowWidth - totalWidth) / 2;
+
+        // 设置几何位置
+        zblabelA->setGeometry(startX, 150, labelWidthA, labelHigh);
+        midLabel->setGeometry(startX + labelWidthA, 150, midWidth, labelHigh);
+        zblabelB->setGeometry(startX + labelWidthA + midWidth, 150, labelWidthB, labelHigh);
     }
 }
 
