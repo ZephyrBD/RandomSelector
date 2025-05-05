@@ -60,7 +60,7 @@ RandomSelector::RandomSelector(QWidget *parent):
     });
 
     connect(rsPivot, &ElaPivot::pivotClicked, this, [this](int index) {
-        qDebug() << "Signal received with index:" << index;
+        qDebug() << "Pivot clicked, index:" << index;
         modChange(index);
     });
     connect(settingButton,&QPushButton::clicked,this,&RandomSelector::onSettingButtonClicked);
